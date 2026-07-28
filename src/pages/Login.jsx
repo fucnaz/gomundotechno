@@ -92,16 +92,25 @@ export default function Login() {
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <div style={{
             display: 'inline-flex',
-            background: 'var(--primary-grad)',
             width: '54px',
             height: '54px',
             borderRadius: '16px',
             alignItems: 'center',
             justifyContent: 'center',
             marginBottom: '1rem',
-            boxShadow: 'var(--glow-cyan)'
+            boxShadow: 'var(--glow-cyan)',
+            overflow: 'hidden',
+            border: '1px solid var(--border-color)'
           }}>
-            <Wrench size={28} color="#000" strokeWidth={2.5} />
+            <img 
+              src="/iconologo.png" 
+              alt="Logo Go Mundo Techno" 
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover'
+              }}
+            />
           </div>
           <h1 style={{
             fontSize: '1.75rem',

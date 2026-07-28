@@ -49,16 +49,25 @@ export default function Sidebar({ activeTab, setActiveTab }) {
         padding: '0.5rem'
       }}>
         <div style={{
-          background: 'var(--primary-grad)',
           width: '40px',
           height: '40px',
           borderRadius: '12px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          boxShadow: 'var(--glow-cyan)'
+          boxShadow: 'var(--glow-cyan)',
+          overflow: 'hidden',
+          border: '1px solid var(--border-color)'
         }}>
-          <Wrench size={20} color="#000" strokeWidth={2.5} />
+          <img 
+            src="/iconologo.png" 
+            alt="Logo Go Mundo Techno" 
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover'
+            }}
+          />
         </div>
         <div>
           <h2 style={{

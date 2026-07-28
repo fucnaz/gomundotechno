@@ -13,6 +13,38 @@ export default function Settings() {
 
   const isAdmin = user?.role === 'admin';
 
+  if (!isAdmin) {
+    return (
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: 'calc(100vh - 10rem)',
+        gap: '1rem',
+        textAlign: 'center'
+      }}>
+        <div style={{
+          background: 'rgba(255, 23, 68, 0.1)',
+          color: 'var(--color-danger)',
+          width: '60px',
+          height: '60px',
+          borderRadius: '50%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          border: '1px solid rgba(255, 23, 68, 0.2)'
+        }}>
+          <XCircle size={28} />
+        </div>
+        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem' }}>Acceso Restringido</h2>
+        <p style={{ color: 'var(--text-secondary)', maxWidth: '400px' }}>
+          Lo sentimos, solo los usuarios con el rol de <strong>Administrador</strong> tienen permisos para modificar la configuración de conexión de la base de datos.
+        </p>
+      </div>
+    );
+  }
+
   const handleSave = async (e) => {
     e.preventDefault();
     if (!isAdmin) {

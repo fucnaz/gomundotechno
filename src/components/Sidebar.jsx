@@ -23,7 +23,7 @@ export default function Sidebar({ activeTab, setActiveTab }) {
     { id: 'inventory', label: 'Inventario', icon: Package, roles: ['admin', 'vendedor_tecnico'] },
     { id: 'reports', label: 'Reportes', icon: BarChart3, roles: ['admin'] },
     { id: 'users', label: 'Usuarios', icon: UsersIcon, roles: ['admin'] },
-    { id: 'settings', label: 'Configuración', icon: SettingsIcon, roles: ['admin', 'vendedor_tecnico'] }
+    { id: 'settings', label: 'Configuración', icon: SettingsIcon, roles: ['admin'] }
   ];
 
   const filteredItems = menuItems.filter(item => item.roles.includes(user?.role));

@@ -328,3 +328,134 @@ h1, h2, h3, h4, h5, h6 {
   gap: 1rem;
   background: var(--bg-main);
 }
+
+/* Responsive Grid Framework */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.sales-grid {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 1.5rem;
+  height: calc(100vh - 6rem);
+}
+
+.service-adder-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1.2fr auto;
+  gap: 0.75rem;
+  align-items: end;
+}
+
+.kanban-board {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Sidebar & Header Responsive Display */
+.sidebar-aside {
+  display: flex !important;
+}
+.mobile-nav-bar {
+  display: none !important;
+}
+.mobile-header-bar {
+  display: none !important;
+}
+
+@media (max-width: 1024px) {
+  .sales-grid {
+    grid-template-columns: 1fr;
+    height: auto;
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 900px) {
+  .kanban-board {
+    grid-template-columns: 1fr;
+    overflow-y: auto;
+    gap: 1.5rem;
+    height: auto;
+    flex: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar-aside {
+    display: none !important;
+  }
+  
+  .mobile-nav-bar {
+    display: flex !important;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100vw;
+    height: 64px;
+    background: rgba(13, 16, 32, 0.95);
+    backdrop-filter: blur(16px);
+    border-top: 1px solid var(--border-color);
+    z-index: 100;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0.25rem;
+  }
+  
+  .mobile-header-bar {
+    display: flex !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 56px;
+    background: rgba(13, 16, 32, 0.95);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border-color);
+    z-index: 100;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 1rem;
+  }
+  
+  .main-content {
+    margin-top: 56px;
+    margin-bottom: 64px;
+    padding: 1rem !important;
+    height: calc(100vh - 120px) !important;
+  }
+  
+  .header-actions {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .service-adder-grid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  
+  .service-adder-grid .btn {
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+

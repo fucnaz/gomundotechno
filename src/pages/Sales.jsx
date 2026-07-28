@@ -264,7 +264,7 @@ export default function Sales() {
   };
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 400px', gap: '1.5rem', height: 'calc(100vh - 6rem)' }}>
+    <div className="sales-grid">
       
       {/* Left Panel: Catalog and Service Adder */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', overflowY: 'auto', paddingRight: '0.5rem' }}>
@@ -393,7 +393,7 @@ export default function Sales() {
             Cargar Servicio o Producto Personalizado
           </h2>
           
-          <form onSubmit={addManualItem} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1.2fr auto', gap: '0.75rem', alignItems: 'end' }}>
+          <form onSubmit={addManualItem} className="service-adder-grid">
             <div className="form-group" style={{ marginBottom: 0 }}>
               <label className="form-label">Descripción del Item/Servicio</label>
               <input

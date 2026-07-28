@@ -179,13 +179,7 @@ export default function Repairs({ setActiveTab }) {
       </div>
 
       {/* Kanban Board */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
-        gap: '1rem',
-        flex: 1,
-        overflow: 'hidden'
-      }}>
+      <div className="kanban-board">
         {columns.map(col => {
           const columnRepairs = repairsByStatus[col] || [];
           

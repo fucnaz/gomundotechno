@@ -141,7 +141,7 @@ export default function Inventory() {
       </div>
 
       {/* Stats Quick Ribbon */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
+      <div className="stats-grid">
         <div className="glass-panel" style={{ padding: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <div style={{ background: 'rgba(0, 242, 254, 0.1)', padding: '0.5rem', borderRadius: '10px', color: 'var(--primary-cyan)' }}>
             <Package size={24} />

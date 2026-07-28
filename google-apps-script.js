@@ -13,22 +13,12 @@
  */
 
 function doPost(e) {
-  // Manejo de CORS
-  var origin = "*";
-  var headers = {
-    "Access-Control-Allow-Origin": origin,
-    "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
-    "Access-Control-Max-Age": "86400"
-  };
-  
   if (!e || !e.postData || !e.postData.contents) {
     return ContentService.createTextOutput(JSON.stringify({
       success: false,
       error: "No se recibieron datos"
     }))
-    .setMimeType(ContentService.MimeType.JSON)
-    .setHeaders(headers);
+    .setMimeType(ContentService.MimeType.JSON);
   }
 
   try {
@@ -70,28 +60,15 @@ function doPost(e) {
     }
 
     return ContentService.createTextOutput(JSON.stringify(result))
-      .setMimeType(ContentService.MimeType.JSON)
-      .setHeaders(headers);
+      .setMimeType(ContentService.MimeType.JSON);
 
   } catch (err) {
     return ContentService.createTextOutput(JSON.stringify({
       success: false,
       error: err.toString()
     }))
-    .setMimeType(ContentService.MimeType.JSON)
-    .setHeaders(headers);
+    .setMimeType(ContentService.MimeType.JSON);
   }
-}
-
-// Permitir peticiones preflight OPTIONS para CORS
-function doOptions(e) {
-  var headers = {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
-    "Access-Control-Max-Age": "86400"
-  };
-  return ContentService.createTextOutput("").setHeaders(headers);
 }
 
 // También permitir GET para pruebas rápidas
@@ -99,17 +76,12 @@ function doGet(e) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   inicializarHojas(ss);
   
-  var headers = {
-    "Access-Control-Allow-Origin": "*"
-  };
-  
   return ContentService.createTextOutput(JSON.stringify({
     status: "online",
     message: "Servicio de Go Mundo Techno activo. Usa peticiones POST para operar.",
     sheetsAvailable: ss.getSheets().map(s => s.getName())
   }))
-  .setMimeType(ContentService.MimeType.JSON)
-  .setHeaders(headers);
+  .setMimeType(ContentService.MimeType.JSON);
 }
 
 // Helper para hashear contraseñas en SHA-256

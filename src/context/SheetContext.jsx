@@ -140,7 +140,7 @@ export const SheetProvider = ({ children }) => {
         method: 'POST',
         mode: 'cors',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'text/plain',
         },
         body: JSON.stringify({ action, data })
       });

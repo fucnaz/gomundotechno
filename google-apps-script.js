@@ -55,6 +55,12 @@ function doPost(e) {
       case "saveUser":
         result = saveUser(ss, data);
         break;
+      case "saveExpense":
+        result = saveExpense(ss, data);
+        break;
+      case "deleteExpense":
+        result = deleteExpense(ss, data);
+        break;
       default:
         result = { success: false, error: "Acción no reconocida: " + action };
     }
@@ -104,7 +110,8 @@ function inicializarHojas(ss) {
     "users": ["id", "username", "password", "name", "role", "status"],
     "products": ["id", "name", "description", "price", "stock", "category"],
     "repairs": ["id", "date", "customerName", "customerPhone", "deviceModel", "issueDescription", "estimatePrice", "status", "comments", "technicianId"],
-    "sales": ["id", "date", "userId", "items", "subtotal", "total", "paymentMethod", "type", "repairId"]
+    "sales": ["id", "date", "userId", "items", "subtotal", "total", "paymentMethod", "type", "repairId"],
+    "expenses": ["id", "date", "userId", "description", "amount", "paymentMethod"]
   };
 
   for (var sheetName in sheetsInfo) {
@@ -199,7 +206,8 @@ function getAppData(ss) {
     }),
     products: getSheetData(ss.getSheetByName("products")),
     repairs: getSheetData(ss.getSheetByName("repairs")),
-    sales: getSheetData(ss.getSheetByName("sales"))
+    sales: getSheetData(ss.getSheetByName("sales")),
+    expenses: getSheetData(ss.getSheetByName("expenses"))
   };
 }
 
@@ -392,5 +400,43 @@ function saveUser(ss, userData) {
     range.setValues([rowValues]);
   }
   
+  return { success: true };
+}
+
+// Guardar o actualizar un gasto/compra
+function saveExpense(ss, expenseData) {
+  var sheet = ss.getSheetByName("expenses");
+  var headers = headersOf(sheet);
+  var rowIdx = findRowIndexById(sheet, expenseData.id);
+  
+  var rowValues = [];
+  for (var i = 0; i < headers.length; i++) {
+    var key = headers[i];
+    var val = expenseData[key];
+    if (key === "date" && !val) {
+      val = new Date().toISOString();
+    }
+    rowValues.push(val === undefined || val === null ? "" : val);
+  }
+  
+  if (rowIdx === -1) {
+    sheet.appendRow(rowValues);
+  } else {
+    var range = sheet.getRange(rowIdx, 1, 1, headers.length);
+    range.setValues([rowValues]);
+  }
+  
+  return { success: true };
+}
+
+// Eliminar un gasto/compra
+function deleteExpense(ss, data) {
+  var sheet = ss.getSheetByName("expenses");
+  var rowIdx = findRowIndexById(sheet, data.id);
+  if (rowIdx === -1) {
+    return { success: false, error: "Gasto no encontrado" };
+  }
+  
+  sheet.deleteRow(rowIdx);
   return { success: true };
 }

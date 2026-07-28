@@ -102,6 +102,11 @@ const INITIAL_SALES = [
   }
 ];
 
+const INITIAL_EXPENSES = [
+  { id: 'e1', date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), userId: 'admin-id-1', description: 'Compra de 10 Módulos de pantalla iPhone X', amount: 150, paymentMethod: 'Efectivo' },
+  { id: 'e2', date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), userId: 'admin-id-1', description: 'Pack de 30 Vidrios Templados Curvos', amount: 60, paymentMethod: 'Transferencia' }
+];
+
 export const SheetProvider = ({ children }) => {
   const { loginOnline } = useAuth();
   const [sheetUrl, setSheetUrl] = useState(() => localStorage.getItem('gt_sheet_url') || '');
@@ -109,6 +114,7 @@ export const SheetProvider = ({ children }) => {
   const [repairs, setRepairs] = useState([]);
   const [sales, setSales] = useState([]);
   const [users, setUsers] = useState([]);
+  const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [connected, setConnected] = useState(false);
@@ -198,6 +204,14 @@ export const SheetProvider = ({ children }) => {
         setSales(JSON.parse(localSales));
       }
 
+      const localExpenses = localStorage.getItem('gt_expenses');
+      if (!localExpenses) {
+        localStorage.setItem('gt_expenses', JSON.stringify(INITIAL_EXPENSES));
+        setExpenses(INITIAL_EXPENSES);
+      } else {
+        setExpenses(JSON.parse(localExpenses));
+      }
+
       const defaultDemoUsers = [
         { id: 'admin-id-1', username: 'admin', name: 'Administrador Demo', role: 'admin', status: 'activo' },
         { id: 'seller-id-1', username: 'vendedor', name: 'Vendedor Demo', role: 'vendedor_tecnico', status: 'activo' }
@@ -222,6 +236,7 @@ export const SheetProvider = ({ children }) => {
         setRepairs(res.repairs || []);
         setSales(res.sales || []);
         setUsers(res.users || []);
+        setExpenses(res.expenses || []);
         setConnected(true);
       }
     } catch (err) {
@@ -232,10 +247,12 @@ export const SheetProvider = ({ children }) => {
       const localRepairs = localStorage.getItem('gt_repairs') ? JSON.parse(localStorage.getItem('gt_repairs')) : INITIAL_REPAIRS;
       const localSales = localStorage.getItem('gt_sales') ? JSON.parse(localStorage.getItem('gt_sales')) : INITIAL_SALES;
       const localUsers = localStorage.getItem('gt_users') ? JSON.parse(localStorage.getItem('gt_users')) : [];
+      const localExpenses = localStorage.getItem('gt_expenses') ? JSON.parse(localStorage.getItem('gt_expenses')) : INITIAL_EXPENSES;
       setProducts(localProducts);
       setRepairs(localRepairs);
       setSales(localSales);
       setUsers(localUsers);
+      setExpenses(localExpenses);
     } finally {
       if (!silent) setLoading(false);
     }
@@ -500,6 +517,55 @@ export const SheetProvider = ({ children }) => {
     }
   };
 
+  const saveExpense = async (expense) => {
+    const isNew = !expense.id;
+    const finalExpense = {
+      ...expense,
+      id: expense.id || `e_${Date.now()}`,
+      date: expense.date || new Date().toISOString(),
+      amount: Number(expense.amount)
+    };
+
+    if (!sheetUrl) {
+      const updatedExpenses = isNew
+        ? [finalExpense, ...expenses]
+        : expenses.map(e => e.id === expense.id ? finalExpense : e);
+      
+      localStorage.setItem('gt_expenses', JSON.stringify(updatedExpenses));
+      setExpenses(updatedExpenses);
+      showToast(isNew ? 'Gasto registrado localmente' : 'Gasto actualizado localmente', 'success');
+      return true;
+    }
+
+    try {
+      await executeApi('saveExpense', finalExpense);
+      showToast(isNew ? 'Gasto registrado en Sheets' : 'Gasto actualizado en Sheets', 'success');
+      fetchData(true);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  };
+
+  const deleteExpense = async (id) => {
+    if (!sheetUrl) {
+      const updatedExpenses = expenses.filter(e => e.id !== id);
+      localStorage.setItem('gt_expenses', JSON.stringify(updatedExpenses));
+      setExpenses(updatedExpenses);
+      showToast('Gasto eliminado localmente', 'warning');
+      return true;
+    }
+
+    try {
+      await executeApi('deleteExpense', { id });
+      showToast('Gasto eliminado de Sheets', 'warning');
+      fetchData(true);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  };
+
   return (
     <SheetContext.Provider value={{
       sheetUrl,
@@ -521,6 +587,9 @@ export const SheetProvider = ({ children }) => {
       saveRepair,
       updateRepairStatus,
       saveUser,
+      expenses,
+      saveExpense,
+      deleteExpense,
       refreshData: () => fetchData(true)
     }}>
       {children}

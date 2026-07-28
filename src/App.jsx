@@ -11,6 +11,7 @@ import Inventory from './pages/Inventory';
 import Reports from './pages/Reports';
 import Users from './pages/Users';
 import Settings from './pages/Settings';
+import CashRegister from './pages/CashRegister';
 
 // Toast Icon mapper
 import { 
@@ -81,6 +82,8 @@ function App() {
         return <Repairs setActiveTab={setActiveTab} />;
       case 'inventory':
         return <Inventory />;
+      case 'cash':
+        return <CashRegister />;
       case 'reports':
         return <Reports />;
       case 'users':

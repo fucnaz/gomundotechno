@@ -8,7 +8,8 @@ import {
   Settings as SettingsIcon, 
   LogOut, 
   User as UserIcon,
-  Database
+  Database,
+  Coins
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useSheet } from '../context/SheetContext';
@@ -21,6 +22,7 @@ export default function Sidebar({ activeTab, setActiveTab }) {
     { id: 'sales', label: 'Ventas (POS)', icon: ShoppingBag, roles: ['admin', 'vendedor_tecnico'] },
     { id: 'repairs', label: 'Reparaciones', icon: Wrench, roles: ['admin', 'vendedor_tecnico'] },
     { id: 'inventory', label: 'Inventario', icon: Package, roles: ['admin', 'vendedor_tecnico'] },
+    { id: 'cash', label: 'Caja Diario', icon: Coins, roles: ['admin', 'vendedor_tecnico'] },
     { id: 'reports', label: 'Reportes', icon: BarChart3, roles: ['admin'] },
     { id: 'users', label: 'Usuarios', icon: UsersIcon, roles: ['admin'] },
     { id: 'settings', label: 'Configuración', icon: SettingsIcon, roles: ['admin'] }

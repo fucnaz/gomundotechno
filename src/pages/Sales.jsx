@@ -14,7 +14,8 @@ import {
   X,
   FileText,
   ShoppingBag,
-  Info
+  Info,
+  Package
 } from 'lucide-react';
 
 export default function Sales() {

@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import html2pdf from 'html2pdf.js';
 import { useSheet } from '../context/SheetContext';
 import { useAuth } from '../context/AuthContext';
 import { 

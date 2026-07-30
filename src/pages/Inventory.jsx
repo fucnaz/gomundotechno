@@ -10,7 +10,8 @@ import {
   AlertTriangle, 
   X,
   Sparkles,
-  Info
+  Info,
+  Camera
 } from 'lucide-react';
 
 export default function Inventory() {
@@ -34,6 +35,61 @@ export default function Inventory() {
   const [stock, setStock] = useState('');
   const [category, setCategory] = useState('Accesorios');
   const [image, setImage] = useState('');
+
+  const [cameraActive, setCameraActive] = useState(false);
+  const [stream, setStream] = useState(null);
+
+  const startCamera = async () => {
+    try {
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment', width: 300, height: 300 }
+      });
+      setStream(mediaStream);
+      setCameraActive(true);
+      setTimeout(() => {
+        const video = document.getElementById('camera-preview');
+        if (video) {
+          video.srcObject = mediaStream;
+        }
+      }, 100);
+    } catch (err) {
+      console.error('Error al acceder a la cámara:', err);
+      showToast('No se pudo acceder a la cámara o permisos denegados', 'danger');
+    }
+  };
+
+  const stopCamera = () => {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+    }
+    setStream(null);
+    setCameraActive(false);
+  };
+
+  const capturePhoto = () => {
+    const video = document.getElementById('camera-preview');
+    if (!video) return;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 150;
+    canvas.height = 150;
+    const ctx = canvas.getContext('2d');
+    
+    const minDim = Math.min(video.videoWidth, video.videoHeight);
+    const sx = (video.videoWidth - minDim) / 2;
+    const sy = (video.videoHeight - minDim) / 2;
+    
+    ctx.drawImage(video, sx, sy, minDim, minDim, 0, 0, 150, 150);
+    
+    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.6);
+    setImage(compressedBase64);
+    stopCamera();
+  };
+
+  const handleCloseForm = () => {
+    stopCamera();
+    setIsFormOpen(false);
+  };
 
   const categories = ['Accesorios', 'Celulares', 'Audio', 'Vidrios', 'Repuestos', 'Otros'];
 
@@ -404,7 +460,7 @@ export default function Inventory() {
             position: 'relative'
           }}>
             <button 
-              onClick={() => setIsFormOpen(false)}
+              onClick={handleCloseForm}
               style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
             >
               <X size={20} />
@@ -499,7 +555,7 @@ export default function Inventory() {
                     )}
                   </div>
                   <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                       <button
                         type="button"
                         onClick={() => {
@@ -511,7 +567,18 @@ export default function Inventory() {
                       >
                         Subir Archivo
                       </button>
-                      {image && (
+                      
+                      <button
+                        type="button"
+                        onClick={cameraActive ? stopCamera : startCamera}
+                        className="btn btn-secondary"
+                        style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
+                      >
+                        <Camera size={12} />
+                        {cameraActive ? 'Apagar Cámara' : 'Tomar Foto'}
+                      </button>
+
+                      {image && !cameraActive && (
                         <button
                           type="button"
                           onClick={() => setImage('')}
@@ -534,6 +601,42 @@ export default function Inventory() {
                     onChange={handleFileChange}
                   />
                 </div>
+                
+                {cameraActive && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '0.75rem', marginTop: '0.5rem', marginBottom: '0.5rem' }}>
+                    <video
+                      id="camera-preview"
+                      autoPlay
+                      playsInline
+                      style={{
+                        width: '100%',
+                        height: '180px',
+                        borderRadius: '8px',
+                        objectFit: 'cover',
+                        background: '#000'
+                      }}
+                    />
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <button
+                        type="button"
+                        onClick={capturePhoto}
+                        className="btn btn-primary"
+                        style={{ flex: 1, padding: '0.4rem', fontSize: '0.8rem', borderRadius: '6px' }}
+                      >
+                        Capturar Foto
+                      </button>
+                      <button
+                        type="button"
+                        onClick={stopCamera}
+                        className="btn btn-secondary"
+                        style={{ flex: 1, padding: '0.4rem', fontSize: '0.8rem', borderRadius: '6px' }}
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 <input
                   type="text"
                   placeholder="O pega la URL de una imagen externa (ej. https://...)"
@@ -545,7 +648,7 @@ export default function Inventory() {
               </div>
 
               <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
-                <button type="button" onClick={() => setIsFormOpen(false)} className="btn btn-secondary">
+                <button type="button" onClick={handleCloseForm} className="btn btn-secondary">
                   Cancelar
                 </button>
                 <button type="submit" className="btn btn-primary" disabled={loading}>

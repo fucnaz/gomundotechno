@@ -16,7 +16,8 @@ import {
   FileText,
   ShoppingBag,
   Info,
-  Package
+  Package,
+  Save
 } from 'lucide-react';
 
 export default function Sales() {
@@ -791,42 +792,25 @@ export default function Sales() {
             <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
               <button 
                 onClick={() => {
-                  const printContents = document.getElementById('receipt-print-area').innerHTML;
-                  const originalContents = document.body.innerHTML;
+                  const element = document.getElementById('receipt-print-area');
+                  const itemsCount = completedSale.items ? completedSale.items.length : 1;
+                  const estimatedHeight = 90 + (itemsCount * 10);
                   
-                  // Inject print styles & ticket contents to replace the whole view temporarily for clean system printing
-                  const printWindow = window.open('', '_blank');
-                  printWindow.document.write(`
-                    <html>
-                      <head>
-                        <title>Imprimir Ticket - Go Mundo Tecno</title>
-                        <style>
-                          body { font-family: monospace; padding: 20px; color: #000; background: #fff; }
-                          table { width: 100%; border-collapse: collapse; }
-                          th, td { padding: 4px 0; }
-                          tr { border-bottom: 1px dashed #000; }
-                          .text-center { text-align: center; }
-                          .text-right { text-align: right; }
-                        </style>
-                      </head>
-                      <body>
-                        ${printContents}
-                        <script>
-                          window.onload = function() {
-                            window.print();
-                            window.close();
-                          }
-                        </script>
-                      </body>
-                    </html>
-                  `);
-                  printWindow.document.close();
+                  const opt = {
+                    margin:       [4, 4, 4, 4],
+                    filename:     `ticket_${completedSale.id}.pdf`,
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 3, useCORS: true },
+                    jsPDF:        { unit: 'mm', format: [80, Math.max(140, estimatedHeight)], orientation: 'portrait' }
+                  };
+                  
+                  html2pdf().from(element).set(opt).save();
                 }}
                 className="btn btn-primary"
                 style={{ flex: 1, padding: '0.65rem' }}
               >
-                <Printer size={16} />
-                Imprimir
+                <Save size={16} />
+                Guardar PDF
               </button>
               <button 
                 onClick={() => setIsReceiptOpen(false)}

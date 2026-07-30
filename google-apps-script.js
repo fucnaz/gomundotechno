@@ -1,5 +1,5 @@
 /**
- * Backend para Sistema de Ventas Go Mundo Techno
+ * Backend para Sistema de Ventas Go Mundo Tecno
  * 
  * Instrucciones:
  * 1. Abre tu Google Sheet.
@@ -84,7 +84,7 @@ function doGet(e) {
   
   return ContentService.createTextOutput(JSON.stringify({
     status: "online",
-    message: "Servicio de Go Mundo Techno activo. Usa peticiones POST para operar.",
+    message: "Servicio de Go Mundo Tecno activo. Usa peticiones POST para operar.",
     sheetsAvailable: ss.getSheets().map(s => s.getName())
   }))
   .setMimeType(ContentService.MimeType.JSON);
@@ -108,7 +108,7 @@ function sha256(input) {
 function inicializarHojas(ss) {
   var sheetsInfo = {
     "users": ["id", "username", "password", "name", "role", "status"],
-    "products": ["id", "name", "description", "price", "stock", "category"],
+    "products": ["id", "name", "description", "price", "stock", "category", "image"],
     "repairs": ["id", "date", "customerName", "customerPhone", "deviceModel", "issueDescription", "estimatePrice", "status", "comments", "technicianId"],
     "sales": ["id", "date", "userId", "items", "subtotal", "total", "paymentMethod", "type", "repairId"],
     "expenses": ["id", "date", "userId", "description", "amount", "paymentMethod"]

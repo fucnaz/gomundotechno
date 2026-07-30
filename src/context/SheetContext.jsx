@@ -13,13 +13,13 @@ export const useSheet = () => {
 
 // Initial Mock Data for Demo Mode
 const INITIAL_PRODUCTS = [
-  { id: 'p1', name: 'iPhone 13 Pro 128GB', description: 'Reacondicionado Grado A, color Grafito', price: 899, stock: 5, category: 'Celulares' },
-  { id: 'p2', name: 'Vidrio Templado 9D iPhone 13/14', description: 'Vidrio templado dureza 9H con bordes curvos', price: 12, stock: 120, category: 'Vidrios' },
-  { id: 'p3', name: 'Cargador Carga Rápida USB-C 20W', description: 'Cargador compatible con carga rápida Power Delivery', price: 25, stock: 45, category: 'Accesorios' },
-  { id: 'p4', name: 'Samsung Galaxy A54 5G', description: 'Pantalla Super AMOLED 120Hz, 128GB ROM, 8GB RAM', price: 420, stock: 8, category: 'Celulares' },
-  { id: 'p5', name: 'Auriculares Inalámbricos SoundBuds', description: 'Auriculares bluetooth con cancelación de ruido activa', price: 59, stock: 15, category: 'Audio' },
-  { id: 'p6', name: 'Cable USB-C a Lightning 1.2m', description: 'Cable reforzado de nylon para carga y datos', price: 15, stock: 80, category: 'Accesorios' },
-  { id: 'p7', name: 'Vidrio Templado UV Curvo Galaxy S23', description: 'Vidrio templado con pegamento líquido UV para pantallas curvas', price: 18, stock: 50, category: 'Vidrios' }
+  { id: 'p1', name: 'iPhone 13 Pro 128GB', description: 'Reacondicionado Grado A, color Grafito', price: 899, stock: 5, category: 'Celulares', image: 'https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=300&q=80' },
+  { id: 'p2', name: 'Vidrio Templado 9D iPhone 13/14', description: 'Vidrio templado dureza 9H con bordes curvos', price: 12, stock: 120, category: 'Vidrios', image: 'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=300&q=80' },
+  { id: 'p3', name: 'Cargador Carga Rápida USB-C 20W', description: 'Cargador compatible con carga rápida Power Delivery', price: 25, stock: 45, category: 'Accesorios', image: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=300&q=80' },
+  { id: 'p4', name: 'Samsung Galaxy A54 5G', description: 'Pantalla Super AMOLED 120Hz, 128GB ROM, 8GB RAM', price: 420, stock: 8, category: 'Celulares', image: 'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=300&q=80' },
+  { id: 'p5', name: 'Auriculares Inalámbricos SoundBuds', description: 'Auriculares bluetooth con cancelación de ruido activa', price: 59, stock: 15, category: 'Audio', image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&q=80' },
+  { id: 'p6', name: 'Cable USB-C a Lightning 1.2m', description: 'Cable reforzado de nylon para carga y datos', price: 15, stock: 80, category: 'Accesorios', image: 'https://images.unsplash.com/photo-1541660707924-76222444c13a?w=300&q=80' },
+  { id: 'p7', name: 'Vidrio Templado UV Curvo Galaxy S23', description: 'Vidrio templado con pegamento líquido UV para pantallas curvas', price: 18, stock: 50, category: 'Vidrios', image: 'https://images.unsplash.com/photo-1605170439002-90f450c36b56?w=300&q=80' }
 ];
 
 const INITIAL_REPAIRS = [
@@ -109,7 +109,7 @@ const INITIAL_EXPENSES = [
 
 export const SheetProvider = ({ children }) => {
   const { loginOnline } = useAuth();
-  const [sheetUrl, setSheetUrl] = useState(() => localStorage.getItem('gt_sheet_url') || '');
+  const sheetUrl = 'https://script.google.com/macros/s/AKfycbzX24wmNRd_Va6szKezP97VC4pvXABKcK6XdzikcADMe5BH5EgrZRGu0KxDByLf-3gu/exec';
   const [products, setProducts] = useState([]);
   const [repairs, setRepairs] = useState([]);
   const [sales, setSales] = useState([]);
@@ -263,38 +263,9 @@ export const SheetProvider = ({ children }) => {
     fetchData();
   }, [sheetUrl]);
 
-  // Save sheet URL
+  // Save sheet URL (Hardcoded database connection, always returns true)
   const saveSheetUrl = async (url) => {
-    if (!url) {
-      localStorage.removeItem('gt_sheet_url');
-      setSheetUrl('');
-      setConnected(false);
-      showToast('Google Sheets desconectado. Modo Demo activo.', 'info');
-      return true;
-    }
-
-    // Try testing connection
-    setLoading(true);
-    try {
-      const testRes = await fetch(url, { method: 'GET', mode: 'cors' });
-      if (!testRes.ok) throw new Error('Respuesta inválida del servidor');
-      const testData = await testRes.json();
-      
-      if (testData.status === 'online') {
-        localStorage.setItem('gt_sheet_url', url);
-        setSheetUrl(url);
-        setConnected(true);
-        showToast('¡Conectado exitosamente a Google Sheets!', 'success');
-        setLoading(false);
-        return true;
-      }
-      throw new Error('El script no coincide con la versión requerida');
-    } catch (err) {
-      console.error(err);
-      showToast(`Error de conexión: ${err.message}. Verifica que el script esté publicado como web app y con acceso a "Cualquiera".`, 'danger');
-      setLoading(false);
-      return false;
-    }
+    return true;
   };
 
   // Authenticate user via Google Sheets

@@ -111,7 +111,8 @@ export default function Sales() {
         category: product.category,
         quantity: 1, 
         stock: product.stock,
-        isManual: false 
+        isManual: false,
+        image: product.image
       }];
     });
   };
@@ -332,18 +333,48 @@ export default function Sales() {
                     className="glass-card" 
                     onClick={() => !outOfStock && addToCart(prod)}
                     style={{ 
-                      padding: '1rem', 
+                      padding: '0.85rem', 
                       cursor: outOfStock ? 'not-allowed' : 'pointer',
                       opacity: outOfStock ? 0.6 : 1,
                       display: 'flex',
                       flexDirection: 'column',
-                      height: '180px',
+                      height: '270px',
                       justifyContent: 'space-between',
                       position: 'relative'
                     }}
                   >
                     <div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.25rem' }}>
+                      {/* Product Image Container */}
+                      <div style={{
+                        width: '100%',
+                        height: '110px',
+                        borderRadius: '8px',
+                        overflow: 'hidden',
+                        background: 'rgba(255, 255, 255, 0.02)',
+                        border: '1px solid var(--border-color)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        position: 'relative'
+                      }}>
+                        {prod.image ? (
+                          <img src={prod.image} alt={prod.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ) : (
+                          <div style={{
+                            width: '100%',
+                            height: '100%',
+                            background: 'linear-gradient(135deg, rgba(22,28,54,0.4) 0%, rgba(10,12,22,0.6) 100%)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: 'var(--text-muted)'
+                          }}>
+                            <Package size={36} strokeWidth={1.5} />
+                          </div>
+                        )}
+                      </div>
+
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.65rem', gap: '0.25rem' }}>
                         <span className="badge badge-info" style={{ fontSize: '0.55rem', padding: '0.1rem 0.35rem' }}>
                           {prod.category}
                         </span>
@@ -355,16 +386,29 @@ export default function Sales() {
                           <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Stock: {prod.stock}</span>
                         )}
                       </div>
-                      <h3 style={{ fontSize: '0.95rem', marginTop: '0.5rem', lineHeight: '1.25', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }} title={prod.name}>
+                      
+                      <h3 style={{ 
+                        fontSize: '0.85rem', 
+                        marginTop: '0.4rem', 
+                        lineHeight: '1.25', 
+                        color: 'var(--text-primary)', 
+                        overflow: 'hidden', 
+                        textOverflow: 'ellipsis', 
+                        display: '-webkit-box', 
+                        WebkitLineClamp: 2, 
+                        WebkitBoxOrient: 'vertical',
+                        fontWeight: 600,
+                        fontFamily: 'var(--font-sans)'
+                      }} title={prod.name}>
                         {prod.name}
                       </h3>
-                      <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.25rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={prod.description}>
+                      <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '0.2rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={prod.description}>
                         {prod.description}
                       </p>
                     </div>
                     
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem' }}>
-                      <span style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--primary-cyan)' }}>
+                      <span style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--primary-cyan)' }}>
                         ${Number(prod.price).toLocaleString()}
                       </span>
                       <div style={{
@@ -374,7 +418,8 @@ export default function Sales() {
                         borderRadius: '8px',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center'
+                        justifyContent: 'center',
+                        boxShadow: outOfStock ? 'none' : 'var(--glow-cyan)'
                       }}>
                         <Plus size={16} color={outOfStock ? 'var(--text-muted)' : '#000'} strokeWidth={3} />
                       </div>
@@ -503,6 +548,24 @@ export default function Sales() {
                   alignItems: 'center'
                 }}
               >
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '6px',
+                  overflow: 'hidden',
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid var(--border-color)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  {item.image ? (
+                    <img src={item.image} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    <Package size={16} color="var(--text-muted)" />
+                  )}
+                </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <h4 style={{ fontSize: '0.85rem', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={item.name}>
                     {item.name}
@@ -663,7 +726,7 @@ export default function Sales() {
             }}>
               <div style={{ textAlign: 'center', borderBottom: '1px dashed #000', paddingBottom: '0.75rem', marginBottom: '0.75rem' }}>
                 <h2 style={{ fontSize: '1.1rem', fontWeight: 'bold', margin: '0 0 0.2rem 0', fontFamily: 'monospace' }}>
-                  GO MUNDO TECHNO
+                  GO MUNDO TECNO
                 </h2>
                 <p style={{ margin: '0 0 0.15rem 0' }}>Venta y Reparación de Celulares</p>
                 <p style={{ margin: '0 0 0.15rem 0' }}>Colocación de Vidrios Templados</p>
@@ -734,7 +797,7 @@ export default function Sales() {
                   printWindow.document.write(`
                     <html>
                       <head>
-                        <title>Imprimir Ticket - Go Mundo Techno</title>
+                        <title>Imprimir Ticket - Go Mundo Tecno</title>
                         <style>
                           body { font-family: monospace; padding: 20px; color: #000; background: #fff; }
                           table { width: 100%; border-collapse: collapse; }

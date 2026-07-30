@@ -461,7 +461,7 @@ export default function CashRegister() {
             }}>
               <div style={{ textAlign: 'center', borderBottom: '1px dashed #000', paddingBottom: '0.75rem', marginBottom: '0.75rem' }}>
                 <h2 style={{ fontSize: '1.1rem', fontWeight: 'bold', margin: '0 0 0.2rem 0', fontFamily: 'monospace' }}>
-                  GO MUNDO TECHNO
+                  GO MUNDO TECNO
                 </h2>
                 <p style={{ margin: '0 0 0.15rem 0' }}>Reporte de Arqueo y Cierre de Caja</p>
                 <p style={{ margin: '0' }}><strong>FECHA:</strong> {formatDateLabel(selectedDate)}</p>
@@ -559,7 +559,7 @@ export default function CashRegister() {
                   printWindow.document.write(`
                     <html>
                       <head>
-                        <title>Cierre de Caja - Go Mundo Techno</title>
+                        <title>Cierre de Caja - Go Mundo Tecno</title>
                         <style>
                           body { font-family: monospace; padding: 20px; color: #000; background: #fff; }
                           .text-center { text-align: center; }

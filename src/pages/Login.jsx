@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
 import { useSheet } from '../context/SheetContext';
-import { Lock, User, AlertCircle, Wrench, ChevronRight } from 'lucide-react';
+import { Lock, User, AlertCircle, ChevronRight } from 'lucide-react';
 
 export default function Login() {
-  const { loginLocal, loginOnline } = useAuth();
-  const { sheetUrl, loginSheet, loading: apiLoading, showToast } = useSheet();
+  const { loginSheet, loading: apiLoading } = useSheet();
   
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -23,20 +21,10 @@ export default function Login() {
     setLoading(true);
 
     try {
-      if (sheetUrl) {
-        // Online login via Google Sheets
-        const res = await loginSheet(username, password);
-        if (!res.success) {
-          setError(res.error || 'Error al iniciar sesión.');
-        }
-      } else {
-        // Offline demo fallback login
-        const res = await loginLocal(username, password);
-        if (res.success) {
-          showToast('Sesión iniciada en Modo Demo (Local)', 'info');
-        } else {
-          setError(res.error);
-        }
+      // Online login via Google Sheets
+      const res = await loginSheet(username, password);
+      if (!res.success) {
+        setError(res.error || 'Error al iniciar sesión.');
       }
     } catch (err) {
       setError(err.message || 'Error de conexión con el servidor.');
@@ -44,8 +32,6 @@ export default function Login() {
       setLoading(false);
     }
   };
-
-  const isDemoMode = !sheetUrl;
 
   return (
     <div style={{
@@ -104,7 +90,7 @@ export default function Login() {
           }}>
             <img 
               src="/iconologo.png" 
-              alt="Logo Go Mundo Techno" 
+              alt="Logo Go Mundo Tecno" 
               style={{
                 width: '100%',
                 height: '100%',
@@ -120,37 +106,15 @@ export default function Login() {
             WebkitTextFillColor: 'transparent',
             fontFamily: 'var(--font-display)'
           }}>
-            Go Mundo Techno
+            Go Mundo Tecno
           </h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
             Acceso al Sistema de Gestión de Ventas
           </p>
         </div>
 
-        {/* Demo Mode Notice */}
-        {isDemoMode && (
-          <div style={{
-            background: 'rgba(255, 179, 0, 0.08)',
-            border: '1px solid rgba(255, 179, 0, 0.25)',
-            borderRadius: '10px',
-            padding: '0.85rem',
-            marginBottom: '1.5rem',
-            fontSize: '0.8rem',
-            color: 'var(--color-warning)'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem', fontWeight: 'bold' }}>
-              <AlertCircle size={16} />
-              <span>Modo Demo Activo (Local)</span>
-            </div>
-            <p style={{ color: 'var(--text-secondary)' }}>
-              Para probar el sistema sin configurar Google Sheets, inicia sesión con:
-            </p>
-            <div style={{ marginTop: '0.5rem', fontFamily: 'monospace', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-              <div><strong>Admin:</strong> admin / admin123</div>
-              <div><strong>Vendedor:</strong> vendedor / vendedor123</div>
-            </div>
-          </div>
-        )}
+        {/* Space spacing */}
+        <div style={{ height: '0.5rem' }}></div>
 
         {/* Error message */}
         {error && (

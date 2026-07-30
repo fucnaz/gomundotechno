@@ -49,7 +49,7 @@ function App() {
           <Wrench size={32} color="#000" strokeWidth={2.5} />
         </div>
         <h2 style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)', fontSize: '1.25rem', fontWeight: 600 }}>
-          Cargando Go Mundo Techno...
+          Cargando Go Mundo Tecno...
         </h2>
         <span className="spinner"></span>
         

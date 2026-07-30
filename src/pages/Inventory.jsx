@@ -33,8 +33,48 @@ export default function Inventory() {
   const [price, setPrice] = useState('');
   const [stock, setStock] = useState('');
   const [category, setCategory] = useState('Accesorios');
+  const [image, setImage] = useState('');
 
   const categories = ['Accesorios', 'Celulares', 'Audio', 'Vidrios', 'Repuestos', 'Otros'];
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 150;
+        const MAX_HEIGHT = 150;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.6);
+        setImage(compressedBase64);
+      };
+    };
+  };
 
   // Filter products
   const filteredProducts = useMemo(() => {
@@ -57,6 +97,7 @@ export default function Inventory() {
     setPrice('');
     setStock('');
     setCategory('Accesorios');
+    setImage('');
     setIsFormOpen(true);
   };
 
@@ -71,6 +112,7 @@ export default function Inventory() {
     setPrice(product.price.toString());
     setStock(product.stock.toString());
     setCategory(product.category);
+    setImage(product.image || '');
     setIsFormOpen(true);
   };
 
@@ -109,7 +151,8 @@ export default function Inventory() {
       description: description.trim(),
       price: priceNum,
       stock: stockNum,
-      category: category
+      category: category,
+      image: image
     };
 
     const success = await saveProduct(productData);
@@ -250,8 +293,30 @@ export default function Inventory() {
                       className="table-row-hover"
                     >
                       <td style={{ padding: '0.75rem' }}>
-                        <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{prod.name}</div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{prod.description || 'Sin descripción'}</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                          <div style={{
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '8px',
+                            overflow: 'hidden',
+                            background: 'rgba(255, 255, 255, 0.03)',
+                            border: '1px solid var(--border-color)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0
+                          }}>
+                            {prod.image ? (
+                              <img src={prod.image} alt={prod.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            ) : (
+                              <Package size={20} color="var(--text-muted)" />
+                            )}
+                          </div>
+                          <div>
+                            <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{prod.name}</div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{prod.description || 'Sin descripción'}</div>
+                          </div>
+                        </div>
                       </td>
                       <td style={{ padding: '0.75rem' }}>
                         <span className="badge badge-info" style={{ fontSize: '0.65rem' }}>
@@ -410,6 +475,73 @@ export default function Inventory() {
                     <option key={cat} value={cat}>{cat}</option>
                   ))}
                 </select>
+              </div>
+
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label">Imagen del Producto</label>
+                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginBottom: '0.5rem' }}>
+                  <div style={{
+                    width: '60px',
+                    height: '60px',
+                    borderRadius: '8px',
+                    overflow: 'hidden',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid var(--border-color)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    {image ? (
+                      <img src={image} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                      <Package size={28} color="var(--text-muted)" />
+                    )}
+                  </div>
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const fileInput = document.getElementById('product-image-file');
+                          if (fileInput) fileInput.click();
+                        }}
+                        className="btn btn-secondary"
+                        style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem', borderRadius: '6px' }}
+                      >
+                        Subir Archivo
+                      </button>
+                      {image && (
+                        <button
+                          type="button"
+                          onClick={() => setImage('')}
+                          className="btn btn-secondary"
+                          style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem', borderRadius: '6px', color: 'var(--color-danger)', borderColor: 'rgba(255,23,68,0.2)' }}
+                        >
+                          Eliminar
+                        </button>
+                      )}
+                    </div>
+                    <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
+                      Las imágenes locales se optimizan automáticamente.
+                    </span>
+                  </div>
+                  <input
+                    type="file"
+                    id="product-image-file"
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    onChange={handleFileChange}
+                  />
+                </div>
+                <input
+                  type="text"
+                  placeholder="O pega la URL de una imagen externa (ej. https://...)"
+                  className="form-input"
+                  style={{ fontSize: '0.8rem', padding: '0.5rem 0.75rem' }}
+                  value={image}
+                  onChange={e => setImage(e.target.value)}
+                />
               </div>
 
               <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '1rem' }}>

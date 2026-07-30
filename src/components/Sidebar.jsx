@@ -65,7 +65,7 @@ export default function Sidebar({ activeTab, setActiveTab }) {
           }}>
             <img 
               src="/iconologo.png" 
-              alt="Logo Go Mundo Techno" 
+              alt="Logo Go Mundo Tecno" 
               style={{
                 width: '100%',
                 height: '100%',
@@ -82,7 +82,7 @@ export default function Sidebar({ activeTab, setActiveTab }) {
               textShadow: '0 0 20px rgba(0,242,254,0.15)',
               fontFamily: 'var(--font-display)'
             }}>
-              Go Mundo Techno
+              Go Mundo Tecno
             </h2>
             <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', letterSpacing: '0.05em' }}>
               SISTEMA DE GESTIÓN
@@ -214,7 +214,7 @@ export default function Sidebar({ activeTab, setActiveTab }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <img src="/iconologo.png" alt="Logo" style={{ width: '28px', height: '28px', borderRadius: '8px' }} />
           <span style={{ fontWeight: 'bold', fontSize: '0.95rem', fontFamily: 'var(--font-display)' }}>
-            Go Mundo Techno
+            Go Mundo Tecno
           </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>

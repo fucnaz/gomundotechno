@@ -108,7 +108,7 @@ function sha256(input) {
 function inicializarHojas(ss) {
   var sheetsInfo = {
     "users": ["id", "username", "password", "name", "role", "status"],
-    "products": ["id", "name", "description", "price", "stock", "category", "image"],
+    "products": ["id", "name", "description", "price", "stock", "category", "image", "cost"],
     "repairs": ["id", "date", "customerName", "customerPhone", "deviceModel", "issueDescription", "estimatePrice", "status", "comments", "technicianId"],
     "sales": ["id", "date", "userId", "items", "subtotal", "total", "paymentMethod", "type", "repairId"],
     "expenses": ["id", "date", "userId", "description", "amount", "paymentMethod"]

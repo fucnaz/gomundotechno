@@ -11,7 +11,8 @@ import {
   X,
   Sparkles,
   Info,
-  Camera
+  Camera,
+  Coins
 } from 'lucide-react';
 
 export default function Inventory() {
@@ -19,6 +20,7 @@ export default function Inventory() {
   const { user } = useAuth();
 
   const isAdmin = user?.role === 'admin';
+  const canModify = user?.role === 'admin' || user?.role === 'vendedor_tecnico';
 
   // Search States
   const [searchQuery, setSearchQuery] = useState('');
@@ -32,6 +34,7 @@ export default function Inventory() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
+  const [cost, setCost] = useState('');
   const [stock, setStock] = useState('');
   const [category, setCategory] = useState('Accesorios');
   const [image, setImage] = useState('');
@@ -143,14 +146,15 @@ export default function Inventory() {
   }, [products, searchQuery, selectedCategory]);
 
   const handleOpenCreate = () => {
-    if (!isAdmin) {
-      showToast('Solo los administradores pueden añadir productos al inventario', 'warning');
+    if (!canModify) {
+      showToast('Solo los administradores y vendedores pueden añadir productos al inventario', 'warning');
       return;
     }
     setEditingProduct(null);
     setName('');
     setDescription('');
     setPrice('');
+    setCost('');
     setStock('');
     setCategory('Accesorios');
     setImage('');
@@ -158,14 +162,15 @@ export default function Inventory() {
   };
 
   const handleOpenEdit = (product) => {
-    if (!isAdmin) {
-      showToast('Solo los administradores pueden modificar productos del inventario', 'warning');
+    if (!canModify) {
+      showToast('Solo los administradores y vendedores pueden modificar productos del inventario', 'warning');
       return;
     }
     setEditingProduct(product);
     setName(product.name);
     setDescription(product.description || '');
     setPrice(product.price.toString());
+    setCost(product.cost ? product.cost.toString() : '');
     setStock(product.stock.toString());
     setCategory(product.category);
     setImage(product.image || '');
@@ -191,9 +196,14 @@ export default function Inventory() {
 
     const priceNum = Number(price);
     const stockNum = Number(stock);
+    const costNum = Number(cost || 0);
 
     if (isNaN(priceNum) || priceNum <= 0) {
       showToast('Ingresa un precio válido', 'warning');
+      return;
+    }
+    if (isAdmin && (isNaN(costNum) || costNum < 0)) {
+      showToast('Ingresa un costo válido', 'warning');
       return;
     }
     if (isNaN(stockNum) || stockNum < 0) {
@@ -208,7 +218,8 @@ export default function Inventory() {
       price: priceNum,
       stock: stockNum,
       category: category,
-      image: image
+      image: image,
+      cost: isAdmin ? costNum : (editingProduct ? editingProduct.cost : 0)
     };
 
     const success = await saveProduct(productData);
@@ -231,7 +242,7 @@ export default function Inventory() {
           </p>
         </div>
 
-        {isAdmin && (
+        {canModify && (
           <button onClick={handleOpenCreate} className="btn btn-primary" style={{ display: 'flex', gap: '0.5rem' }}>
             <Plus size={18} strokeWidth={2.5} />
             Nuevo Producto
@@ -240,7 +251,7 @@ export default function Inventory() {
       </div>
 
       {/* Stats Quick Ribbon */}
-      <div className="stats-grid">
+      <div className="stats-grid" style={{ gridTemplateColumns: isAdmin ? 'repeat(auto-fit, minmax(200px, 1fr))' : undefined }}>
         <div className="glass-panel" style={{ padding: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <div style={{ background: 'rgba(0, 242, 254, 0.1)', padding: '0.5rem', borderRadius: '10px', color: 'var(--primary-cyan)' }}>
             <Package size={24} />
@@ -282,6 +293,34 @@ export default function Inventory() {
             </p>
           </div>
         </div>
+
+        {isAdmin && (
+          <>
+            <div className="glass-panel" style={{ padding: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <div style={{ background: 'rgba(255, 179, 0, 0.1)', padding: '0.5rem', borderRadius: '10px', color: 'var(--color-warning)' }}>
+                <Coins size={24} />
+              </div>
+              <div>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Inversión en Inventario</p>
+                <p style={{ fontSize: '1.25rem', fontWeight: 800 }}>
+                  ${products.reduce((sum, p) => sum + ((p.cost || 0) * p.stock), 0).toLocaleString()}
+                </p>
+              </div>
+            </div>
+
+            <div className="glass-panel" style={{ padding: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <div style={{ background: 'rgba(0, 230, 118, 0.1)', padding: '0.5rem', borderRadius: '10px', color: 'var(--color-success)' }}>
+                <Sparkles size={24} />
+              </div>
+              <div>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Ganancia Estimada</p>
+                <p style={{ fontSize: '1.25rem', fontWeight: 800 }}>
+                  ${products.reduce((sum, p) => sum + (((p.price || 0) - (p.cost || 0)) * p.stock), 0).toLocaleString()}
+                </p>
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Filter and Table Container */}
@@ -322,15 +361,16 @@ export default function Inventory() {
                 <th style={{ padding: '0.75rem' }}>Nombre del Producto</th>
                 <th style={{ padding: '0.75rem', width: '140px' }}>Categoría</th>
                 <th style={{ padding: '0.75rem', width: '110px', textAlign: 'right' }}>Precio Unit.</th>
+                {isAdmin && <th style={{ padding: '0.75rem', width: '110px', textAlign: 'right' }}>Costo</th>}
                 <th style={{ padding: '0.75rem', width: '110px', textAlign: 'center' }}>Existencias</th>
                 <th style={{ padding: '0.75rem', width: '110px', textAlign: 'center' }}>Estado</th>
-                {isAdmin && <th style={{ padding: '0.75rem', width: '110px', textAlign: 'center' }}>Acciones</th>}
+                {canModify && <th style={{ padding: '0.75rem', width: '110px', textAlign: 'center' }}>Acciones</th>}
               </tr>
             </thead>
             <tbody>
               {filteredProducts.length === 0 ? (
                 <tr>
-                  <td colSpan={isAdmin ? 6 : 5} style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                  <td colSpan={canModify ? (isAdmin ? 7 : 6) : (isAdmin ? 6 : 5)} style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
                     No se encontraron productos en el inventario.
                   </td>
                 </tr>
@@ -379,9 +419,14 @@ export default function Inventory() {
                           {prod.category}
                         </span>
                       </td>
-                      <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: 600, color: 'var(--primary-cyan)' }}>
+                       <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: 600, color: 'var(--primary-cyan)' }}>
                         ${Number(prod.price).toLocaleString()}
                       </td>
+                      {isAdmin && (
+                        <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: 600, color: 'var(--color-warning)' }}>
+                          ${Number(prod.cost || 0).toLocaleString()}
+                        </td>
+                      )}
                       <td style={{ padding: '0.75rem', textAlign: 'center', fontWeight: 'bold' }}>
                         {prod.stock}
                       </td>
@@ -394,7 +439,7 @@ export default function Inventory() {
                           <span className="badge badge-success" style={{ fontSize: '0.6rem' }}>Disponible</span>
                         )}
                       </td>
-                      {isAdmin && (
+                      {canModify && (
                         <td style={{ padding: '0.75rem', textAlign: 'center' }}>
                           <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
                             <button
@@ -412,20 +457,22 @@ export default function Inventory() {
                               <Edit2 size={14} />
                             </button>
                             
-                            <button
-                              onClick={() => handleDelete(prod.id, prod.name)}
-                              style={{
-                                background: 'rgba(255, 23, 68, 0.05)',
-                                border: '1px solid rgba(255, 23, 68, 0.1)',
-                                borderRadius: '6px',
-                                padding: '0.35rem',
-                                color: 'var(--color-danger)',
-                                cursor: 'pointer'
-                              }}
-                              title="Eliminar Producto"
-                            >
-                              <Trash2 size={14} />
-                            </button>
+                            {isAdmin && (
+                              <button
+                                onClick={() => handleDelete(prod.id, prod.name)}
+                                style={{
+                                  background: 'rgba(255, 23, 68, 0.05)',
+                                  border: '1px solid rgba(255, 23, 68, 0.1)',
+                                  borderRadius: '6px',
+                                  padding: '0.35rem',
+                                  color: 'var(--color-danger)',
+                                  cursor: 'pointer'
+                                }}
+                                title="Eliminar Producto"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            )}
                           </div>
                         </td>
                       )}
@@ -495,7 +542,7 @@ export default function Inventory() {
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isAdmin ? '1fr 1fr 1fr' : '1fr 1fr', gap: '1rem' }}>
                 <div className="form-group" style={{ marginBottom: 0 }}>
                   <label className="form-label">Precio Unitario ($) *</label>
                   <input
@@ -507,6 +554,19 @@ export default function Inventory() {
                     onChange={e => setPrice(e.target.value)}
                   />
                 </div>
+                {isAdmin && (
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label">Costo ($) *</label>
+                    <input
+                      type="number"
+                      required
+                      placeholder="0"
+                      className="form-input"
+                      value={cost}
+                      onChange={e => setCost(e.target.value)}
+                    />
+                  </div>
+                )}
                 <div className="form-group" style={{ marginBottom: 0 }}>
                   <label className="form-label">Stock Inicial *</label>
                   <input

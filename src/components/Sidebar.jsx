@@ -1,11 +1,10 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   ShoppingBag, 
   Wrench, 
   Package, 
   BarChart3, 
   Users as UsersIcon, 
-  Settings as SettingsIcon, 
   LogOut, 
   User as UserIcon,
   Database,
@@ -15,17 +14,36 @@ import { useAuth } from '../context/AuthContext';
 import { useSheet } from '../context/SheetContext';
 
 export default function Sidebar({ activeTab, setActiveTab }) {
-  const { user, logout, isAdmin } = useAuth();
+  const { user, logout } = useAuth();
   const { connected } = useSheet();
 
+  const [clickCount, setClickCount] = useState(0);
+  const clickTimeoutRef = useRef(null);
+
+  const handleLogoClick = () => {
+    setClickCount(prev => {
+      const next = prev + 1;
+      if (next >= 5) {
+        window.dispatchEvent(new CustomEvent('open-superadmin'));
+        return 0;
+      }
+      return next;
+    });
+
+    if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
+    clickTimeoutRef.current = setTimeout(() => {
+      setClickCount(0);
+    }, 2000);
+  };
+
+  // Standard menu items (Settings is restricted to SuperAdmin via shortcut / 5-clicks)
   const menuItems = [
     { id: 'sales', label: 'Ventas (POS)', icon: ShoppingBag, roles: ['admin', 'vendedor_tecnico'] },
     { id: 'repairs', label: 'Reparaciones', icon: Wrench, roles: ['admin', 'vendedor_tecnico'] },
     { id: 'inventory', label: 'Inventario', icon: Package, roles: ['admin', 'vendedor_tecnico'] },
     { id: 'cash', label: 'Caja Diario', icon: Coins, roles: ['admin', 'vendedor_tecnico'] },
     { id: 'reports', label: 'Reportes', icon: BarChart3, roles: ['admin'] },
-    { id: 'users', label: 'Usuarios', icon: UsersIcon, roles: ['admin'] },
-    { id: 'settings', label: 'Configuración', icon: SettingsIcon, roles: ['admin'] }
+    { id: 'users', label: 'Usuarios', icon: UsersIcon, roles: ['admin'] }
   ];
 
   const filteredItems = menuItems.filter(item => item.roles.includes(user?.role));
@@ -44,14 +62,20 @@ export default function Sidebar({ activeTab, setActiveTab }) {
         padding: '1.5rem',
         borderRadius: '24px'
       }}>
-        {/* Brand Header */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.75rem',
-          marginBottom: '2rem',
-          padding: '0.5rem'
-        }}>
+        {/* Brand Header with 5-clicks SuperAdmin trigger */}
+        <div 
+          onClick={handleLogoClick}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+            marginBottom: '2rem',
+            padding: '0.5rem',
+            cursor: 'pointer',
+            userSelect: 'none'
+          }}
+          title="Go Mundo Tecno"
+        >
           <div style={{
             width: '40px',
             height: '40px',
@@ -61,7 +85,8 @@ export default function Sidebar({ activeTab, setActiveTab }) {
             justifyContent: 'center',
             boxShadow: 'var(--glow-cyan)',
             overflow: 'hidden',
-            border: '1px solid var(--border-color)'
+            border: '1px solid var(--border-color)',
+            transition: 'transform 0.15s ease'
           }}>
             <img 
               src="/iconologo.png" 
@@ -98,104 +123,109 @@ export default function Sidebar({ activeTab, setActiveTab }) {
           padding: '0.75rem',
           background: 'rgba(255, 255, 255, 0.03)',
           border: '1px solid var(--border-color)',
-          borderRadius: '14px',
+          borderRadius: '16px',
           marginBottom: '1.5rem'
         }}>
           <div style={{
-            background: 'rgba(255,255,255,0.08)',
             width: '36px',
             height: '36px',
-            borderRadius: '50%',
+            borderRadius: '10px',
+            background: user?.role === 'admin' ? 'rgba(0, 230, 118, 0.15)' : 'rgba(0, 176, 255, 0.15)',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            color: user?.role === 'admin' ? 'var(--color-success)' : 'var(--primary-cyan)'
           }}>
-            <UserIcon size={18} color="var(--text-secondary)" />
+            <UserIcon size={20} />
           </div>
-          <div style={{ overflow: 'hidden' }}>
-            <p style={{
-              fontSize: '0.875rem',
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{
+              fontSize: '0.85rem',
               fontWeight: 600,
+              color: 'var(--text-primary)',
               whiteSpace: 'nowrap',
               overflow: 'hidden',
               textOverflow: 'ellipsis'
             }}>
-              {user?.name}
-            </p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+              {user?.name || user?.username || 'Usuario'}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.15rem' }}>
               <span className={`badge ${user?.role === 'admin' ? 'badge-success' : 'badge-info'}`} style={{
-                fontSize: '0.55rem',
+                fontSize: '0.65rem',
                 padding: '0.1rem 0.4rem'
               }}>
                 {user?.role === 'admin' ? 'Admin' : 'Técnico/Vendedor'}
               </span>
-              <div style={{
-                width: '6px',
-                height: '6px',
-                borderRadius: '50%',
-                backgroundColor: connected ? 'var(--color-success)' : 'var(--color-warning)',
-                boxShadow: connected ? 'var(--glow-success)' : 'none',
-                display: 'inline-block'
-              }} title={connected ? 'Conectado a Sheets' : 'Modo Demo (Local)'}></div>
             </div>
           </div>
         </div>
 
-        {/* Navigation Links */}
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
-          {filteredItems.map(item => {
-            const IconComponent = item.icon;
+        {/* Navigation Menu */}
+        <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+          {filteredItems.map((item) => {
+            const Icon = item.icon;
             const isActive = activeTab === item.id;
             return (
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
+                className={`sidebar-link ${isActive ? 'active' : ''}`}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.85rem',
-                  width: '100%',
-                  padding: '0.85rem 1rem',
-                  border: 'none',
+                  gap: '0.75rem',
+                  padding: '0.75rem 1rem',
                   borderRadius: '12px',
-                  background: isActive ? 'rgba(0, 242, 254, 0.08)' : 'transparent',
-                  color: isActive ? 'var(--primary-cyan)' : 'var(--text-secondary)',
-                  borderLeft: isActive ? '3px solid var(--primary-cyan)' : '3px solid transparent',
-                  textAlign: 'left',
-                  fontSize: '0.925rem',
-                  fontWeight: isActive ? 600 : 500,
+                  border: 'none',
+                  background: isActive ? 'var(--primary-grad)' : 'transparent',
+                  color: isActive ? '#03040a' : 'var(--text-secondary)',
+                  fontWeight: isActive ? 600 : 400,
+                  fontSize: '0.9rem',
                   cursor: 'pointer',
+                  width: '100%',
+                  textAlign: 'left',
                   transition: 'all var(--transition-fast)',
-                  fontFamily: 'var(--font-display)'
+                  fontFamily: 'var(--font-sans)',
+                  boxShadow: isActive ? 'var(--glow-cyan)' : 'none'
                 }}
-                className={isActive ? '' : 'nav-hover-effect'}
               >
-                <IconComponent size={18} strokeWidth={isActive ? 2.5 : 2} />
-                {item.label}
+                <Icon size={18} strokeWidth={isActive ? 2.5 : 2} color={isActive ? '#03040a' : 'currentColor'} />
+                <span>{item.label}</span>
               </button>
             );
           })}
         </nav>
 
-        {/* Database Connection Status Bar */}
+        {/* Database Status Indicator (Compact) */}
         <div style={{
+          padding: '0.75rem',
+          background: 'rgba(255, 255, 255, 0.02)',
+          border: '1px solid var(--border-color)',
+          borderRadius: '12px',
+          marginBottom: '1rem',
           display: 'flex',
           alignItems: 'center',
-          gap: '0.5rem',
-          padding: '0.5rem',
-          marginBottom: '1rem',
-          borderTop: '1px solid var(--border-color)'
+          gap: '0.5rem'
         }}>
-          <Database size={14} />
-          <span>{connected ? 'Base de datos en línea' : 'Base de datos: MODO DEMO'}</span>
+          <Database size={14} color={connected ? 'var(--color-success)' : 'var(--color-warning)'} />
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+            Base de datos:
+          </span>
+          <span style={{ 
+            fontSize: '0.75rem', 
+            fontWeight: 600, 
+            color: connected ? 'var(--color-success)' : 'var(--color-warning)',
+            marginLeft: 'auto'
+          }}>
+            {connected ? 'Online' : 'Respaldo'}
+          </span>
         </div>
 
         {/* Logout Button */}
         <button
           onClick={logout}
-          className="btn btn-secondary"
+          className="btn btn-outline"
           style={{
-            width: '100%',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -211,7 +241,10 @@ export default function Sidebar({ activeTab, setActiveTab }) {
 
       {/* Mobile Top Header */}
       <div className="mobile-header-bar">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div 
+          onClick={handleLogoClick}
+          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}
+        >
           <img src="/iconologo.png" alt="Logo" style={{ width: '28px', height: '28px', borderRadius: '8px' }} />
           <span style={{ fontWeight: 'bold', fontSize: '0.95rem', fontFamily: 'var(--font-display)' }}>
             Go Mundo Tecno
@@ -266,7 +299,7 @@ export default function Sidebar({ activeTab, setActiveTab }) {
             >
               <IconComponent size={20} strokeWidth={isActive ? 2.5 : 2} />
               <span style={{ fontSize: '0.6rem', fontWeight: isActive ? 600 : 400, fontFamily: 'var(--font-display)', whiteSpace: 'nowrap' }}>
-                {item.label === 'Configuración' ? 'Config' : item.label === 'Reparaciones' ? 'Taller' : item.label}
+                {item.label === 'Reparaciones' ? 'Taller' : item.label}
               </span>
             </button>
           );

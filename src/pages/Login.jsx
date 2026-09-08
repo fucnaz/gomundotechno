@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useSheet } from '../context/SheetContext';
-import { Lock, User, AlertCircle, ChevronRight } from 'lucide-react';
+import { Lock, User, AlertCircle, ChevronRight, KeyRound } from 'lucide-react';
 
 export default function Login() {
   const { loginSheet, loading: apiLoading } = useSheet();
@@ -9,6 +9,25 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const [clickCount, setClickCount] = useState(0);
+  const clickTimeoutRef = useRef(null);
+
+  const handleLogoClick = () => {
+    setClickCount(prev => {
+      const next = prev + 1;
+      if (next >= 5) {
+        window.dispatchEvent(new CustomEvent('open-superadmin'));
+        return 0;
+      }
+      return next;
+    });
+
+    if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
+    clickTimeoutRef.current = setTimeout(() => {
+      setClickCount(0);
+    }, 2000);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -72,10 +91,15 @@ export default function Login() {
         maxWidth: '450px',
         padding: '2.5rem',
         zIndex: 1,
-        border: '1px solid rgba(255, 255, 255, 0.1)'
+        border: '1px solid rgba(255, 255, 255, 0.1)',
+        position: 'relative'
       }}>
-        {/* Brand Header */}
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+        {/* Brand Header with 5-clicks SuperAdmin trigger */}
+        <div 
+          onClick={handleLogoClick}
+          style={{ textAlign: 'center', marginBottom: '2rem', cursor: 'pointer', userSelect: 'none' }}
+          title="Go Mundo Tecno"
+        >
           <div style={{
             display: 'inline-flex',
             width: '54px',
@@ -86,7 +110,8 @@ export default function Login() {
             marginBottom: '1rem',
             boxShadow: 'var(--glow-cyan)',
             overflow: 'hidden',
-            border: '1px solid var(--border-color)'
+            border: '1px solid var(--border-color)',
+            transition: 'transform 0.15s ease'
           }}>
             <img 
               src="/iconologo.png" 
@@ -206,6 +231,43 @@ export default function Login() {
             )}
           </button>
         </form>
+
+        {/* Secret SuperAdmin hint / trigger */}
+        <div style={{
+          marginTop: '1.5rem',
+          textAlign: 'center',
+          fontSize: '0.75rem',
+          color: 'var(--text-muted)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '0.4rem'
+        }}>
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new CustomEvent('open-superadmin'))}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'var(--text-muted)',
+              cursor: 'pointer',
+              fontSize: '0.75rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.3rem',
+              padding: '0.2rem 0.5rem',
+              borderRadius: '6px',
+              transition: 'color 0.2s'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.color = 'var(--primary-cyan)'}
+            onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-muted)'}
+            title="Atajo: Ctrl + Shift + S"
+          >
+            <KeyRound size={12} />
+            <span>SuperAdmin (Ctrl + Shift + S)</span>
+          </button>
+        </div>
+
       </div>
     </div>
   );

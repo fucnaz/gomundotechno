@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from './context/AuthContext';
 import { useSheet } from './context/SheetContext';
 import Sidebar from './components/Sidebar';
+import SuperAdminModal from './components/SuperAdminModal';
 
 // Pages
 import Login from './pages/Login';
@@ -27,6 +28,30 @@ function App() {
   const { user, loading: authLoading } = useAuth();
   const { loading: sheetLoading, toasts, removeToast } = useSheet();
   const [activeTab, setActiveTab] = useState('sales');
+  const [isSuperAdminOpen, setIsSuperAdminOpen] = useState(false);
+
+  // Global listener for SuperAdmin trigger (Ctrl + Shift + S or Custom Event)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Ctrl + Shift + S or Cmd + Shift + S
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'S' || e.key === 's')) {
+        e.preventDefault();
+        setIsSuperAdminOpen(prev => !prev);
+      }
+    };
+
+    const handleCustomOpen = () => {
+      setIsSuperAdminOpen(true);
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('open-superadmin', handleCustomOpen);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('open-superadmin', handleCustomOpen);
+    };
+  }, []);
 
   const isLoading = authLoading || (sheetLoading && !user); // only show global loading screen initially if user is not set
 
@@ -69,6 +94,10 @@ function App() {
       <>
         <Login />
         <ToastContainer toasts={toasts} removeToast={removeToast} />
+        <SuperAdminModal 
+          isOpen={isSuperAdminOpen} 
+          onClose={() => setIsSuperAdminOpen(false)} 
+        />
       </>
     );
   }
@@ -107,6 +136,12 @@ function App() {
 
       {/* Toast Alert System Overlay */}
       <ToastContainer toasts={toasts} removeToast={removeToast} />
+
+      {/* SuperAdmin Global Modal Overlay */}
+      <SuperAdminModal 
+        isOpen={isSuperAdminOpen} 
+        onClose={() => setIsSuperAdminOpen(false)} 
+      />
     </div>
   );
 }

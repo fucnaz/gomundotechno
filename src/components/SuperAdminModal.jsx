@@ -478,8 +478,8 @@ export default function SuperAdminModal({ isOpen, onClose }) {
                     1. URL de la Base de Datos (Google Apps Script)
                   </span>
                 </div>
-                <span className={`badge ${isCustomUrl ? 'badge-info' : 'badge-neutral'}`} style={{ fontSize: '0.7rem' }}>
-                  {isCustomUrl ? 'URL Personalizada en Navegador' : 'URL por Defecto (.env)'}
+                <span className={`badge ${!sheetUrl ? 'badge-warning' : isCustomUrl ? 'badge-info' : 'badge-neutral'}`} style={{ fontSize: '0.7rem' }}>
+                  {!sheetUrl ? 'Modo Local Activo (Sin URL)' : isCustomUrl ? 'URL Personalizada en Navegador' : 'URL por Defecto (.env)'}
                 </span>
               </div>
 
@@ -488,36 +488,37 @@ export default function SuperAdminModal({ isOpen, onClose }) {
                   <input
                     id="superadmin-sheet-url"
                     type="url"
-                    required
                     className="form-input"
                     style={{
                       fontFamily: 'monospace',
                       fontSize: '0.85rem',
                       paddingRight: '3rem'
                     }}
-                    placeholder="https://script.google.com/macros/s/.../exec"
+                    placeholder="Pega la URL de tu Google Apps Script (/exec) o déjala vacía para Modo Local"
                     value={inputUrl}
                     onChange={(e) => {
                       setInputUrl(e.target.value);
                       setTestResult(null);
                     }}
                   />
-                  <button
-                    type="button"
-                    onClick={handleCopyUrl}
-                    className="btn btn-secondary"
-                    style={{
-                      position: 'absolute',
-                      right: '0.5rem',
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      padding: '0.4rem',
-                      height: 'auto'
-                    }}
-                    title="Copiar URL"
-                  >
-                    {copied ? <Check size={16} color="var(--color-success)" /> : <Copy size={16} />}
-                  </button>
+                  {inputUrl && (
+                    <button
+                      type="button"
+                      onClick={handleCopyUrl}
+                      className="btn btn-secondary"
+                      style={{
+                        position: 'absolute',
+                        right: '0.5rem',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        padding: '0.4rem',
+                        height: 'auto'
+                      }}
+                      title="Copiar URL"
+                    >
+                      {copied ? <Check size={16} color="var(--color-success)" /> : <Copy size={16} />}
+                    </button>
+                  )}
                 </div>
 
                 <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>

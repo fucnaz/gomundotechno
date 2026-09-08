@@ -107,10 +107,10 @@ const INITIAL_EXPENSES = [
   { id: 'e2', date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), userId: 'admin-id-1', description: 'Pack de 30 Vidrios Templados Curvos', amount: 60, paymentMethod: 'Transferencia' }
 ];
 
-export const DEFAULT_SHEET_URL = import.meta.env.VITE_GOOGLE_SHEETS_URL || 'https://script.google.com/macros/s/AKfycbzX24wmNRd_Va6szKezP97VC4pvXABKcK6XdzikcADMe5BH5EgrZRGu0KxDByLf-3gu/exec';
+export const DEFAULT_SHEET_URL = import.meta.env.VITE_GOOGLE_SHEETS_URL || '';
 
 export const SheetProvider = ({ children }) => {
-  const { loginOnline } = useAuth();
+  const { loginOnline, loginLocal } = useAuth();
   const [sheetUrl, setSheetUrl] = useState(() => {
     return localStorage.getItem('gt_sheet_url') || DEFAULT_SHEET_URL;
   });
@@ -312,8 +312,10 @@ export const SheetProvider = ({ children }) => {
   const saveSheetUrl = async (newUrl) => {
     const trimmedUrl = (newUrl || '').trim();
     if (!trimmedUrl) {
-      showToast('La URL no puede estar vacía', 'warning');
-      return { success: false, error: 'URL vacía' };
+      localStorage.removeItem('gt_sheet_url');
+      setSheetUrl('');
+      showToast('Base de datos desconectada. Modo local activado.', 'info');
+      return { success: true };
     }
 
     try {
@@ -335,17 +337,23 @@ export const SheetProvider = ({ children }) => {
     return DEFAULT_SHEET_URL;
   };
 
-  // Authenticate user via Google Sheets
+  // Authenticate user via Google Sheets or fallback to local mode
   const loginSheet = async (username, password) => {
     if (!sheetUrl) {
-      throw new Error('Google Sheets URL no configurada');
+      return loginLocal(username, password, users);
     }
-    const res = await executeApi('login', { username, password });
-    if (res.success && res.user) {
-      loginOnline(res.user);
-      return { success: true, user: res.user };
+    try {
+      const res = await executeApi('login', { username, password });
+      if (res.success && res.user) {
+        loginOnline(res.user);
+        return { success: true, user: res.user };
+      }
+      return { success: false, error: res.error || 'Credenciales incorrectas' };
+    } catch (err) {
+      const localRes = await loginLocal(username, password, users);
+      if (localRes.success) return localRes;
+      return { success: false, error: err.message || 'Error al conectar con el servidor' };
     }
-    return { success: false, error: res.error || 'Credenciales incorrectas' };
   };
 
   // Action methods

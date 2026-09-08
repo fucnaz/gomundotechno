@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useSheet } from '../context/SheetContext';
-import { Lock, User, AlertCircle, ChevronRight, KeyRound } from 'lucide-react';
+import { Lock, User, AlertCircle, ChevronRight } from 'lucide-react';
 
 export default function Login() {
   const { loginSheet, loading: apiLoading } = useSheet();
@@ -231,43 +231,6 @@ export default function Login() {
             )}
           </button>
         </form>
-
-        {/* Secret SuperAdmin hint / trigger */}
-        <div style={{
-          marginTop: '1.5rem',
-          textAlign: 'center',
-          fontSize: '0.75rem',
-          color: 'var(--text-muted)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '0.4rem'
-        }}>
-          <button
-            type="button"
-            onClick={() => window.dispatchEvent(new CustomEvent('open-superadmin'))}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--text-muted)',
-              cursor: 'pointer',
-              fontSize: '0.75rem',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.3rem',
-              padding: '0.2rem 0.5rem',
-              borderRadius: '6px',
-              transition: 'color 0.2s'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.color = 'var(--primary-cyan)'}
-            onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-muted)'}
-            title="Atajo: Ctrl + Shift + S"
-          >
-            <KeyRound size={12} />
-            <span>SuperAdmin (Ctrl + Shift + S)</span>
-          </button>
-        </div>
-
       </div>
     </div>
   );

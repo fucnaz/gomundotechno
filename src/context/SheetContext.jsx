@@ -107,9 +107,13 @@ const INITIAL_EXPENSES = [
   { id: 'e2', date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), userId: 'admin-id-1', description: 'Pack de 30 Vidrios Templados Curvos', amount: 60, paymentMethod: 'Transferencia' }
 ];
 
+export const DEFAULT_SHEET_URL = import.meta.env.VITE_GOOGLE_SHEETS_URL || 'https://script.google.com/macros/s/AKfycbzX24wmNRd_Va6szKezP97VC4pvXABKcK6XdzikcADMe5BH5EgrZRGu0KxDByLf-3gu/exec';
+
 export const SheetProvider = ({ children }) => {
   const { loginOnline } = useAuth();
-  const sheetUrl = 'https://script.google.com/macros/s/AKfycbzX24wmNRd_Va6szKezP97VC4pvXABKcK6XdzikcADMe5BH5EgrZRGu0KxDByLf-3gu/exec';
+  const [sheetUrl, setSheetUrl] = useState(() => {
+    return localStorage.getItem('gt_sheet_url') || DEFAULT_SHEET_URL;
+  });
   const [products, setProducts] = useState([]);
   const [repairs, setRepairs] = useState([]);
   const [sales, setSales] = useState([]);
@@ -263,9 +267,72 @@ export const SheetProvider = ({ children }) => {
     fetchData();
   }, [sheetUrl]);
 
-  // Save sheet URL (Hardcoded database connection, always returns true)
-  const saveSheetUrl = async (url) => {
-    return true;
+  // Test a connection to any Google Apps Script Web App URL without saving
+  const testConnection = async (urlToTest) => {
+    const targetUrl = (urlToTest || sheetUrl || '').trim();
+    if (!targetUrl) {
+      return { success: false, error: 'Debes ingresar una URL válida.' };
+    }
+    
+    const startTime = Date.now();
+    try {
+      const response = await fetch(targetUrl, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'text/plain',
+        },
+        body: JSON.stringify({ action: 'getData' })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
+      }
+
+      const resData = await response.json();
+      const duration = Date.now() - startTime;
+      if (resData.success) {
+        return { 
+          success: true, 
+          message: `Conectado exitosamente (${duration}ms)`,
+          userCount: resData.users?.length || 0,
+          productCount: resData.products?.length || 0,
+          repairCount: resData.repairs?.length || 0,
+          duration 
+        };
+      } else {
+        return { success: false, error: resData.error || 'Respuesta inesperada del Web App' };
+      }
+    } catch (err) {
+      return { success: false, error: err.message || 'Error de red o CORS al contactar la URL' };
+    }
+  };
+
+  // Save sheet URL in localStorage and update state to re-sync
+  const saveSheetUrl = async (newUrl) => {
+    const trimmedUrl = (newUrl || '').trim();
+    if (!trimmedUrl) {
+      showToast('La URL no puede estar vacía', 'warning');
+      return { success: false, error: 'URL vacía' };
+    }
+
+    try {
+      localStorage.setItem('gt_sheet_url', trimmedUrl);
+      setSheetUrl(trimmedUrl);
+      showToast('URL de base de datos actualizada y sincronizada', 'success');
+      return { success: true };
+    } catch (err) {
+      showToast(`Error al guardar: ${err.message}`, 'danger');
+      return { success: false, error: err.message };
+    }
+  };
+
+  // Reset to default .env URL
+  const resetSheetUrl = () => {
+    localStorage.removeItem('gt_sheet_url');
+    setSheetUrl(DEFAULT_SHEET_URL);
+    showToast('Base de datos restablecida a la URL por defecto', 'info');
+    return DEFAULT_SHEET_URL;
   };
 
   // Authenticate user via Google Sheets
@@ -541,6 +608,8 @@ export const SheetProvider = ({ children }) => {
   return (
     <SheetContext.Provider value={{
       sheetUrl,
+      defaultSheetUrl: DEFAULT_SHEET_URL,
+      isCustomUrl: sheetUrl !== DEFAULT_SHEET_URL,
       products,
       repairs,
       sales,
@@ -552,6 +621,8 @@ export const SheetProvider = ({ children }) => {
       showToast,
       removeToast,
       saveSheetUrl,
+      testConnection,
+      resetSheetUrl,
       loginSheet,
       saveProduct,
       deleteProduct,
